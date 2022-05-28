@@ -7,10 +7,10 @@ from parsel import Selector
 
 #参数自定义
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-r', dest='read', help='path file')
-parser.add_argument('-u',dest='read',help='targetdomain')
-parser_args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('-r', dest='read', help='path file')
+# parser.add_argument('-u',dest='read',help='targetdomain')
+# parser_args = parser.parse_args()
 #爬虫模块查询
 
 VERBOSE = True
@@ -157,7 +157,6 @@ def askurl(target_url):
     result['register']=register
     result['years']=years
 
-
     try:
         print("备案信息:",beian_no,"名称:",name,"网站首页Title：",title,"企业性质：",nature,"IP地址为：",ip)
         print("*"*60)
@@ -169,55 +168,35 @@ def askurl(target_url):
 strip_fun = lambda x:x.strip() if x is not None else ""
 
 def parse_info(html):
-    # resp = Selector(text=html)
-    # title = strip_fun(resp.xpath('//div[@class="_chinaz-seo-title2 clearfix"]/div/text()').extract_first())
-    # beian_num=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[1]/i/a/text()').extract_first())
-    # nature=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[3]/i/text()').extract_first())
 
-    # name=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[2]/i/text()').extract_first())
-    # ip=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newh78 _chinaz-seo-newinfo"]/div/span[1]/i/a/text()').extract_first())
-    
     resp = Selector(text=html)
     title = strip_fun(resp.xpath('//div[@class="_chinaz-seo-t2l ellipsis"]/text()').extract_first())
     table = resp.xpath('//table[@class="_chinaz-seo-newt"]/tbody')
-    beian_num=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[1]/i/a/text()').extract_first())
+    
+    if table[0].xpath('.//tr[4]/td[2]/span[1]/i'):
+        beian_num=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[1]/i/a/text()').extract_first())
+    else:
+        beian_num=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[1]/a/text()').extract_first())
+
     name=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[2]/i/text()').extract_first())
+    if not name:
+        print('---->',name)
+        name=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[2]/i/a/text()').extract_first())
+
     nature=strip_fun(table[0].xpath('.//tr[4]/td[2]/span[3]/i/text()').extract_first())
     ip=strip_fun(table[0].xpath('.//tr[5]/td[2]/div/span[1]/i/a/text()').extract_first())
     register=strip_fun(table[0].xpath('.//tr[3]/td[2]/div[1]/span[1]/i/text()').extract_first())
     years=strip_fun(table[0].xpath('.//tr[3]/td[2]/div[2]/span[1]/i/text()').extract_first())
 
 
-    # beian_num=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[1]/i/a/text()').extract_first())
-    # nature=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[3]/i/text()').extract_first())
 
-    # name=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newtc _chinaz-seo-newh40"]/span[2]/i/text()').extract_first())
-    # ip=strip_fun(resp.xpath('//td[@class="_chinaz-seo-newh78 _chinaz-seo-newinfo"]/div/span[1]/i/a/text()').extract_first())
-    
     return title,beian_num,name,ip,nature,register,years
 
 
 def crawl_info(site):
     return askurl(site)
 
-#单次domain检测
-def url():
-    urls = parser_args.read
-    try:
-        if "http://" in urls:
-            url = urls[7:]
-        elif "https://" in urls:
-            url = urls[8:]
-        else:
-            url=urls
 
-        askurl(url)
-    except Exception as e:
-        print(e)
-        print(" [*] Please enter the complete domain name!")
-
-def main():
-    url()
 
 
 if __name__ == '__main__':
