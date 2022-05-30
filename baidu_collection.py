@@ -1,6 +1,6 @@
+import re
 from parsel import Selector
 import requests
-
 def baidu_site_collect(site):
     # 百度收录
     headers = {'User-Agent': 'Chrome Google FireFox IE'}
@@ -17,6 +17,15 @@ def baidu_site_collect(site):
     count = selector.xpath('//div[@class="op_site_domain c-row"]/div/p/span/b/text()').extract_first()
     if count:
         count=int(count.replace(',',''))
+
+    else:
+        # 找不到，另外一种形式
+        pattern = '<b>找到相关结果数约(.*?)个</b>'
+        result = re.search(pattern,html)
+        if result:
+            count = result.group(1)
+            count=int(count.replace(',',''))
+
     return count
 
 if __name__=='__main__':
